@@ -1,0 +1,20 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: petly-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: petly
+      POSTGRES_USER: petly
+      POSTGRES_PASSWORD: petly_dev_password
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - petly-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  petly-postgres-data:
