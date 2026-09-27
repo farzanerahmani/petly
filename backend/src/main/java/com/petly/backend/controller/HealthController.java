@@ -1,4 +1,4 @@
-package com.petly.common.controller;
+package com.petly.backend;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,10 +11,10 @@ import java.util.Map;
  * @created 9/25/2026
  */
 @RestController
-@RequestMapping("/api/v1/healthCheck")
+@RequestMapping("/api/v1")
 public class HealthController {
 
-    @GetMapping
+    @GetMapping("/healthCheck")
     public Map<String,String> healthCheck(){
         return  Map.of("status","UP");
     }
