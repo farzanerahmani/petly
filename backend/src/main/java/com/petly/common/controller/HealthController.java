@@ -21,15 +21,4 @@ public class HealthController {
 
         return ApiResponse.success(Map.of("status", "UP"));
     }
-
-
-    public record TestRequest(@NotBlank(message = "name is required")
-                              String name) {
-    }
-
-    @PostMapping("/test-validation")
-    public ApiResponse<String> testValidation(@Valid @RequestBody TestRequest request){
-        return ApiResponse.success(request.name());
-    }
-
 }
