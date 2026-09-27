@@ -1,9 +1,10 @@
 package com.petly.common.controller;
 
+import com.petly.common.exception.ApiError;
 import com.petly.common.response.ApiResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -16,8 +17,19 @@ import java.util.Map;
 public class HealthController {
 
     @GetMapping("/healthCheck")
-    public ApiResponse<Map<String,String>> healthCheck(){
+    public ApiResponse<Map<String, String>> healthCheck() {
 
-        return  ApiResponse.success(Map.of("status","UP"));
+        return ApiResponse.success(Map.of("status", "UP"));
     }
+
+
+    public record TestRequest(@NotBlank(message = "name is required")
+                              String name) {
+    }
+
+    @PostMapping("/test-validation")
+    public ApiResponse<String> testValidation(@Valid @RequestBody TestRequest request){
+        return ApiResponse.success(request.name());
+    }
+
 }
