@@ -1,4 +1,4 @@
-package com.petly.backend;
+package com.petly;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

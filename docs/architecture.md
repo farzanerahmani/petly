@@ -1,15 +1,24 @@
-# Petly Architecture
+# Petly Backend Architecture
 
 ## Overview
 
-Petly is a mobile-first application consisting of:
+Petly backend is a modular monolith built with Spring Boot.
 
-- Flutter mobile application
-- Spring Boot backend
-- PostgreSQL database
+The backend exposes REST APIs consumed by the Flutter mobile application.
 
-## Repository Structure
+## Package Structure
 
-- `backend/` - Spring Boot backend
-- `mobile/` - Flutter mobile application
-- `docs/` - Project documentation
+```text
+com.petly
+├── BackendApplication.java
+│
+├── common
+│   ├── controller
+│   ├── exception
+│   └── response
+│
+└── pet
+    ├── controller
+    ├── service
+    ├── repository
+    └── entity
