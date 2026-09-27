@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: petly_dev_password
 
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
     volumes:
       - petly-postgres-data:/var/lib/postgresql/data
