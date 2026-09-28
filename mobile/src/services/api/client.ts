@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api/v1';
+import { API_BASE_URL } from '../../config/api';
 
 export async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`);
@@ -7,5 +7,7 @@ export async function apiGet<T>(path: string): Promise<T> {
     throw new Error(`API request failed: ${response.status}`);
   }
 
-  return response.json();
+  const json = await response.json();
+
+  return json as T;
 }
