@@ -1,5 +1,5 @@
-import HomeScreen from './src/screens/HomeScreen';
+import CreatePetScreen from './src/screens/CreatePetScreen';
 
 export default function App() {
-  return <HomeScreen />;
+  return <CreatePetScreen />;
 }

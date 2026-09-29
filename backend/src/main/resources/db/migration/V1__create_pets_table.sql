@@ -1,0 +1,5 @@
+CREATE TABLE pets (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    species VARCHAR(50) NOT NULL
+);
