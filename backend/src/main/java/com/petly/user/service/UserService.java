@@ -1,5 +1,7 @@
 package com.petly.user.service;
 
+import com.petly.user.controller.dto.CreateUserRequestDto;
+import com.petly.user.controller.dto.CreateUserResponseDto;
 import com.petly.user.entity.User;
 import com.petly.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +19,17 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public User createUser(String phoneNumber){
-        if(userRepository.existsByPhoneNumber(phoneNumber)){
+    public CreateUserResponseDto createUser(CreateUserRequestDto requestDto){
+        if(userRepository.existsByPhoneNumber(requestDto.getPhoneNumber())){
             throw new IllegalArgumentException("phone number already exists");
         }
 
         User user = new User();
-        user.setPhoneNumber(phoneNumber);
-        return userRepository.save(user);
+        user.setPhoneNumber(requestDto.getPhoneNumber());
+        var response = userRepository.save(user);
+        CreateUserResponseDto responseDto = new CreateUserResponseDto();
+        responseDto.setId(response.getId());
+        responseDto.setPhoneNumber(response.getPhoneNumber());
+        return responseDto;
     }
 }

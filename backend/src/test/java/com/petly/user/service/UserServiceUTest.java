@@ -21,7 +21,7 @@ public class UserServiceUTest extends BaseUserService {
         Mockito.when(userRepository.existsByPhoneNumber(phoneNumber)).thenReturn(false);
         Mockito.when(userRepository.save(any(User.class))).thenReturn(createMockedUser());
 
-        var response = userService.createUser(phoneNumber);
+        var response = userService.createUser(createMockedCreateUserRequest());
 
         Assertions.assertNotNull(response);
         Assertions.assertEquals(response.getPhoneNumber(), phoneNumber);
@@ -33,7 +33,7 @@ public class UserServiceUTest extends BaseUserService {
     void shouldNotCreateUserWithExistsPhoneNumber() {
         Mockito.when(userRepository.existsByPhoneNumber(phoneNumber)).thenReturn(true);
         Assertions.assertThrowsExactly(IllegalArgumentException.class,
-                () -> userService.createUser(phoneNumber));
+                () -> userService.createUser(createMockedCreateUserRequest()));
 
         Mockito.verify(userRepository).existsByPhoneNumber(phoneNumber);
         Mockito.verify(userRepository, Mockito.never()).save(any(User.class));

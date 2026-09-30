@@ -1,5 +1,6 @@
 package com.petly.user.service;
 
+import com.petly.user.controller.dto.CreateUserRequestDto;
 import com.petly.user.entity.User;
 import com.petly.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,5 +31,11 @@ public abstract class BaseUserService {
         User user = new User();
         user.setPhoneNumber(phoneNumber);
         return user;
+    }
+
+    protected CreateUserRequestDto createMockedCreateUserRequest(){
+        CreateUserRequestDto requestDto = new CreateUserRequestDto();
+        requestDto.setPhoneNumber(phoneNumber);
+        return requestDto;
     }
 }
