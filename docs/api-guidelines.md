@@ -1,6 +1,6 @@
 # Petly API Guidelines
 
-## 1. Base URL
+## 1\. Base URL
 
 All API endpoints use the following base path:
 
@@ -14,7 +14,7 @@ Example:
 GET /api/v1/health
 ```
 
-## 2. API Versioning
+## 2\. API Versioning
 
 The current API version is:
 
@@ -34,7 +34,7 @@ Future API versions may use:
 /api/v2/
 ```
 
-## 3. HTTP Methods
+## 3\. HTTP Methods
 
 ### GET
 
@@ -111,19 +111,19 @@ Successful deletion returns:
 204 No Content
 ```
 
-## 4. HTTP Status Codes
+## 4\. HTTP Status Codes
 
-| Status | Meaning |
-|---|---|
-| 200 | Request succeeded |
-| 201 | Resource created |
-| 204 | Request succeeded with no response body |
-| 400 | Invalid request |
-| 404 | Resource not found |
-| 409 | Resource conflict |
-| 500 | Unexpected server error |
+|Status|Meaning|
+|-|-|
+|200|Request succeeded|
+|201|Resource created|
+|204|Request succeeded with no response body|
+|400|Invalid request|
+|404|Resource not found|
+|409|Resource conflict|
+|500|Unexpected server error|
 
-## 5. Success Response
+## 5\. Success Response
 
 Successful API responses use:
 
@@ -146,7 +146,7 @@ For collections:
 
 ```json
 {
-  "data": [
+  "data": \\\\\\\[
     {
       "id": 1,
       "name": "Milo"
@@ -159,7 +159,7 @@ For collections:
 }
 ```
 
-## 6. Error Response
+## 6\. Error Response
 
 Error responses use:
 
@@ -171,7 +171,7 @@ Example:
 
 ```json
 {
-  "code": "PET_NOT_FOUND",
+  "code": "PET\\\\\\\_NOT\\\\\\\_FOUND",
   "message": "Pet not found",
   "details": {}
 }
@@ -183,7 +183,7 @@ The `message` should be human-readable.
 
 The `details` object may contain additional error information.
 
-## 7. Validation Errors
+## 7\. Validation Errors
 
 Invalid request data should return:
 
@@ -195,7 +195,7 @@ Example:
 
 ```json
 {
-  "code": "VALIDATION_ERROR",
+  "code": "VALIDATION\\\\\\\_ERROR",
   "message": "Request validation failed",
   "details": {
     "name": "name is required",
@@ -206,7 +206,7 @@ Example:
 
 Validation should be performed at the API boundary using Jakarta Bean Validation.
 
-## 8. Not Found Errors
+## 8\. Not Found Errors
 
 When a requested resource does not exist:
 
@@ -218,13 +218,13 @@ Example:
 
 ```json
 {
-  "code": "PET_NOT_FOUND",
+  "code": "PET\\\\\\\_NOT\\\\\\\_FOUND",
   "message": "Pet not found",
   "details": {}
 }
 ```
 
-## 9. Conflict Errors
+## 9\. Conflict Errors
 
 When an operation conflicts with the current state of a resource:
 
@@ -236,13 +236,13 @@ Example:
 
 ```json
 {
-  "code": "PET_ALREADY_EXISTS",
+  "code": "PET\\\\\\\_ALREADY\\\\\\\_EXISTS",
   "message": "Pet already exists",
   "details": {}
 }
 ```
 
-## 10. Internal Server Errors
+## 10\. Internal Server Errors
 
 Unexpected server errors should return:
 
@@ -254,7 +254,7 @@ Example:
 
 ```json
 {
-  "code": "INTERNAL_SERVER_ERROR",
+  "code": "INTERNAL\\\\\\\_SERVER\\\\\\\_ERROR",
   "message": "An unexpected error occurred",
   "details": {}
 }
@@ -262,7 +262,7 @@ Example:
 
 Internal implementation details and stack traces should not be exposed to API clients.
 
-## 11. JSON
+## 11\. JSON
 
 The API uses:
 
@@ -280,7 +280,7 @@ Content-Type: application/json
 
 when sending JSON request bodies.
 
-## 12. Resource Naming
+## 12\. Resource Naming
 
 REST resources should use plural nouns.
 
@@ -303,7 +303,7 @@ Avoid:
 
 The HTTP method already describes the operation.
 
-## 13. Resource IDs
+## 13\. Resource IDs
 
 Resources should be accessed by ID using:
 
@@ -317,57 +317,58 @@ Example:
 GET /api/v1/pets/123
 ```
 
-## 14. Controller Rules
+## 14\. Controller Rules
 
 Controllers should:
 
-- Handle HTTP concerns.
-- Validate incoming requests.
-- Call services.
-- Return appropriate HTTP status codes.
+* Handle HTTP concerns.
+* Validate incoming requests.
+* Call services.
+* Return appropriate HTTP status codes.
 
 Controllers should not contain business logic or direct database access.
 
-## 15. Service Rules
+## 15\. Service Rules
 
 Services should:
 
-- Contain business logic.
-- Coordinate application workflows.
-- Call repositories when persistence is required.
-- Remain independent of HTTP-specific concerns where possible.
+* Contain business logic.
+* Coordinate application workflows.
+* Call repositories when persistence is required.
+* Remain independent of HTTP-specific concerns where possible.
 
-## 16. Repository Rules
+## 16\. Repository Rules
 
 Repositories should:
 
-- Handle database access.
-- Execute persistence queries.
-- Avoid business logic.
+* Handle database access.
+* Execute persistence queries.
+* Avoid business logic.
 
-## 17. Error Code Naming
+## 17\. Error Code Naming
 
-Error codes should use uppercase `SNAKE_CASE`.
+Error codes should use uppercase `SNAKE\\\\\\\_CASE`.
 
 Examples:
 
 ```text
-VALIDATION_ERROR
-PET_NOT_FOUND
-PET_ALREADY_EXISTS
-INTERNAL_SERVER_ERROR
+VALIDATION\\\\\\\_ERROR
+PET\\\\\\\_NOT\\\\\\\_FOUND
+PET\\\\\\\_ALREADY\\\\\\\_EXISTS
+INTERNAL\\\\\\\_SERVER\\\\\\\_ERROR
 ```
 
 Error codes should remain stable because mobile clients may use them for specific UI behavior.
 
-## 18. API Design Principles
+## 18\. API Design Principles
 
 The API should remain:
 
-- Consistent
-- Predictable
-- Simple
-- Mobile-friendly
-- Backward-compatible within the same API version
+* Consistent
+* Predictable
+* Simple
+* Mobile-friendly
+* Backward-compatible within the same API version
 
 API design decisions should favor clarity and consistency over unnecessary complexity.
+
