@@ -1,0 +1,2 @@
+ALTER TABLE public.users
+RENAME COLUMN  update_at TO  updated_at
