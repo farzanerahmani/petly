@@ -1,7 +1,6 @@
 package com.petly.pet.entity;
 
-import com.petly.common.entity.AuditEntity;
-import com.petly.common.entity.BaseEntity;
+import com.petly.common.entity.AuditableEntity;
 import com.petly.pet.entity.enums.ActivityLevel;
 import com.petly.pet.entity.enums.Gender;
 import com.petly.pet.entity.enums.Species;
@@ -21,7 +20,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Pet extends AuditEntity {
+public class Pet extends AuditableEntity {
 
     @Column(nullable = false, length = 100)
     private String name;
