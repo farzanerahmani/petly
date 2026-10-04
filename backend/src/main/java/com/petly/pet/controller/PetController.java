@@ -1,8 +1,13 @@
 package com.petly.pet.controller;
 
 import com.petly.common.response.ApiResponse;
-import com.petly.pet.controller.dto.*;
-import com.petly.pet.entity.Pet;
+import com.petly.pet.controller.dto.CreatePetBodyConditionRecordRequestDto;
+import com.petly.pet.controller.dto.CreatePetRequestDto;
+import com.petly.pet.controller.dto.CreatePetWeightRecordRequestDto;
+import com.petly.pet.controller.dto.PetBodyConditionRecordResponseDto;
+import com.petly.pet.controller.dto.PetResponseDto;
+import com.petly.pet.controller.dto.PetWeightRecordResponseDto;
+import com.petly.pet.controller.dto.UpdatePetRequestDto;
 import com.petly.pet.service.PetBodyConditionRecordService;
 import com.petly.pet.service.PetService;
 import com.petly.pet.service.PetWeightRecordService;
@@ -14,44 +19,63 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * @author farzane.rahmani
- * @created 9/29/2026
- */
 @RestController
 @RequestMapping("/api/v1/pets")
 @RequiredArgsConstructor
 public class PetController {
 
     private final PetService petService;
-
     private final PetBodyConditionRecordService petBodyConditionRecordService;
     private final PetWeightRecordService petWeightRecordService;
 
-    @GetMapping
-    public List<Pet> getAllPets() {
-        return petService.getAllPets();
-    }
-
     @PostMapping
-    public ResponseEntity<ApiResponse<CreatePetResponseDto>> createPet(@Valid @RequestBody CreatePetRequestDto requestDto) {
-        CreatePetResponseDto responseDto =
-                petService.createPet(requestDto);
+    public ResponseEntity<ApiResponse<PetResponseDto>> createPet(
+            @Valid @RequestBody CreatePetRequestDto requestDto) {
+
+        PetResponseDto responseDto = petService.createPet(requestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(responseDto));
     }
 
-    @GetMapping("/{petId}/getAllPetWeightRecord")
-    public List<PetWeightRecordResponseDto> getAllPetWeightRecord(@PathVariable Long petId) {
+    @GetMapping("/{petId}")
+    public ResponseEntity<ApiResponse<PetResponseDto>> getPetById(
+            @PathVariable Long petId) {
 
-        return petWeightRecordService.getAllPetWeightRecordsByPetId(petId);
+        PetResponseDto responseDto = petService.getPetById(petId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(responseDto)
+        );
     }
 
-    @PostMapping("/{petId}/createPetWeightRecord")
+    @PutMapping("/{petId}")
+    public ResponseEntity<ApiResponse<Long>> updatePet(
+            @PathVariable Long petId,
+            @Valid @RequestBody UpdatePetRequestDto requestDto) {
+
+        petService.updatePet(petId, requestDto);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(petId)
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<PetResponseDto>>> getAllPets() {
+
+        List<PetResponseDto> responseDto = petService.getAllPets();
+
+        return ResponseEntity.ok(
+                ApiResponse.success(responseDto)
+        );
+    }
+
+    @PostMapping("/{petId}/weight-records")
     public ResponseEntity<ApiResponse<PetWeightRecordResponseDto>> createPetWeightRecord(
             @PathVariable Long petId,
             @Valid @RequestBody CreatePetWeightRecordRequestDto requestDto) {
+
         PetWeightRecordResponseDto responseDto =
                 petWeightRecordService.createPetWeight(petId, requestDto);
 
@@ -59,20 +83,42 @@ public class PetController {
                 .body(ApiResponse.success(responseDto));
     }
 
-    @GetMapping("/{petId}/getAllPetBodyConditionRecord")
-    public List<PetBodyConditionRecordResponseDto> getAllPetBodyConditionRecord(@PathVariable Long petId) {
+    @GetMapping("/{petId}/weight-records")
+    public ResponseEntity<ApiResponse<List<PetWeightRecordResponseDto>>> getAllPetWeightRecords(
+            @PathVariable Long petId) {
 
-        return petBodyConditionRecordService.getPetBodyConditionRecordsByPetId(petId);
+        List<PetWeightRecordResponseDto> responseDto =
+                petWeightRecordService.getAllPetWeightRecordsByPetId(petId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(responseDto)
+        );
     }
 
-    @PostMapping("/{petId}/createPetBodyConditionRecord")
+    @PostMapping("/{petId}/body-condition-records")
     public ResponseEntity<ApiResponse<PetBodyConditionRecordResponseDto>> createPetBodyConditionRecord(
             @PathVariable Long petId,
             @Valid @RequestBody CreatePetBodyConditionRecordRequestDto requestDto) {
+
         PetBodyConditionRecordResponseDto responseDto =
-                petBodyConditionRecordService.createPetBodyConditionRecord(petId, requestDto);
+                petBodyConditionRecordService.createPetBodyConditionRecord(
+                        petId,
+                        requestDto
+                );
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(responseDto));
+    }
+
+    @GetMapping("/{petId}/body-condition-records")
+    public ResponseEntity<ApiResponse<List<PetBodyConditionRecordResponseDto>>> getAllPetBodyConditionRecords(
+            @PathVariable Long petId) {
+
+        List<PetBodyConditionRecordResponseDto> responseDto =
+                petBodyConditionRecordService.getPetBodyConditionRecordsByPetId(petId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(responseDto)
+        );
     }
 }

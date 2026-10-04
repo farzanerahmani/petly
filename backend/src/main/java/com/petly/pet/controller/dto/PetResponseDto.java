@@ -13,7 +13,7 @@ import java.time.LocalDate;
  * @created 9/29/2026
  */
 @Data
-public class CreatePetResponseDto {
+public class PetResponseDto {
     private Long id;
     private String name;
     private Species species;

@@ -1,8 +1,6 @@
 package com.petly.user.controller;
 
 import com.petly.common.response.ApiResponse;
-import com.petly.pet.controller.dto.CreatePetRequestDto;
-import com.petly.pet.controller.dto.CreatePetResponseDto;
 import com.petly.user.controller.dto.CreateUserRequestDto;
 import com.petly.user.controller.dto.CreateUserResponseDto;
 import com.petly.user.service.UserService;
