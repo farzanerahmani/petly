@@ -1,5 +1,5 @@
-import CreatePetScreen from './src/screens/CreatePetScreen';
+import { QuizScreen } from './src/screens/quiz/QuizScreen';
 
 export default function App() {
-  return <CreatePetScreen />;
+  return <QuizScreen />;
 }

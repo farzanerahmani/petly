@@ -2,6 +2,7 @@ package com.petly.pet.service.conventor;
 
 import com.petly.pet.controller.dto.PetResponseDto;
 import com.petly.pet.entity.Pet;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
  * @author farzane.rahmani
  * @created 10/3/2026
  */
+@Component
 public class PetConverter {
 
     public PetResponseDto convertToPetResponseDto(Pet pet){
