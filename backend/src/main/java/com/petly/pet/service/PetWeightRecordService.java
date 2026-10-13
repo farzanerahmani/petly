@@ -1,12 +1,15 @@
 package com.petly.pet.service;
 
+import com.petly.auth.service.CurrentUserService;
 import com.petly.pet.controller.dto.CreatePetWeightRecordRequestDto;
 import com.petly.pet.controller.dto.PetWeightRecordResponseDto;
 import com.petly.pet.entity.Pet;
 import com.petly.pet.entity.PetWeightRecord;
+import com.petly.pet.repository.PetMembershipRepository;
 import com.petly.pet.repository.PetRepository;
 import com.petly.pet.repository.PetWeightRecordRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +26,12 @@ public class PetWeightRecordService {
     private final PetWeightRecordRepository petWeightRecordRepository;
     private final PetRepository petRepository;
 
+    private final PetMembershipRepository petMembershipRepository;
+
+    private final CurrentUserService currentUserService;
+
     public List<PetWeightRecordResponseDto> getAllPetWeightRecordsByPetId(Long petId) {
+        ensurePetBelongsToCurrentUser(petId);
         var petWeight = petWeightRecordRepository.findByPetIdOrderByRecordedDateDesc(
                 petId);
         List<PetWeightRecordResponseDto> responseDtos = new ArrayList<>();
@@ -43,6 +51,8 @@ public class PetWeightRecordService {
     @Transactional
     public PetWeightRecordResponseDto createPetWeight(Long petId, CreatePetWeightRecordRequestDto requestDto) {
 
+        ensurePetBelongsToCurrentUser(petId);
+
         Pet pet = petRepository.findById(petId)
                 .orElseThrow(() -> new IllegalArgumentException("pet not found"));
 
@@ -60,5 +70,15 @@ public class PetWeightRecordService {
         responseDto.setCreatedAt(savedPetWeight.getCreatedAt());
         responseDto.setPetId(savedPetWeight.getPet().getId());
         return responseDto;
+    }
+
+    private void ensurePetBelongsToCurrentUser(Long petId) {
+        Long userId = currentUserService.getCurrentUserId();
+
+        if (!petMembershipRepository.existsByUserIdAndPetId(userId, petId)) {
+            throw new AccessDeniedException(
+                    "You do not have access to this pet"
+            );
+        }
     }
 }

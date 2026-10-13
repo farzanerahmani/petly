@@ -15,6 +15,13 @@ spring:
       hibernate:
         format_sql: true
 
+petly:
+  auth:
+    otp-hmac-secret: ${PETLY_OTP_HMAC_SECRET}
+  jwt:
+    secret: ${PETLY_JWT_SECRET}
+    expiration-seconds: 900
+
 server:
   address: 0.0.0.0
   port: 8080

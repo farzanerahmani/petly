@@ -13,7 +13,6 @@ import java.time.LocalDate;
  */
 @Data
 public class CreatePetRequestDto {
-    private Long userId;
     private String name;
     private Species species;
     private String breed;

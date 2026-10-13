@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+petly:
+  auth:
+    otp:
+      expose-code: true

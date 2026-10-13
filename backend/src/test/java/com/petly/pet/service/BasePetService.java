@@ -1,5 +1,6 @@
 package com.petly.pet.service;
 
+import com.petly.auth.service.CurrentUserService;
 import com.petly.pet.controller.dto.CreatePetRequestDto;
 import com.petly.pet.controller.dto.PetResponseDto;
 import com.petly.pet.controller.dto.UpdatePetRequestDto;
@@ -46,16 +47,21 @@ public abstract class BasePetService {
     @Mock
     protected PetConverter petConverter;
 
+    @Mock
+    protected CurrentUserService currentUserService;
+
     @InjectMocks
     protected PetService petService;
 
     @BeforeEach
     void setup() {
-        petService = new PetService(petRepository, userRepository, petMembershipRepository, petConverter);
+        petService = new PetService(petRepository, userRepository,
+                petMembershipRepository, petConverter,currentUserService);
     }
 
     protected User createMockedUser() {
         User user = new User();
+        user.setId(1L);
         user.setPhoneNumber("09127808205");
         user.setId(petId);
         user.setCreatedAt(Instant.now());
@@ -85,6 +91,12 @@ public abstract class BasePetService {
         return petMembership;
     }
 
+    protected List<PetMembership> createMockedListPetMembership(){
+        List<PetMembership> list = new ArrayList<>();
+        list.add(createMockedPetMembership());
+        return list;
+    }
+
     protected CreatePetRequestDto createMockedPetRequestDto() {
         CreatePetRequestDto requestDto = new CreatePetRequestDto();
         requestDto.setName("Milo");
@@ -93,7 +105,6 @@ public abstract class BasePetService {
         requestDto.setSpecies(Species.DOG);
         requestDto.setBirthDate(LocalDate.now());
         requestDto.setActivityLevel(ActivityLevel.HIGH);
-        requestDto.setUserId(1L);
         return requestDto;
     }
 

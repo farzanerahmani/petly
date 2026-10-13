@@ -1,5 +1,6 @@
 package com.petly.pet.service;
 
+import com.petly.auth.service.CurrentUserService;
 import com.petly.pet.controller.dto.CreatePetRequestDto;
 import com.petly.pet.controller.dto.PetResponseDto;
 import com.petly.pet.controller.dto.UpdatePetRequestDto;
@@ -15,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 
 /**
@@ -29,20 +29,26 @@ public class PetService {
     private final PetRepository petRepository;
     private final UserRepository userRepository;
     private final PetMembershipRepository petMembershipRepository;
-
     private final PetConverter petConverter;
 
+    private final CurrentUserService currentUserService;
+
+
     public PetResponseDto getPetById(Long petId) {
+        ensurePetBelongsToCurrentUser(petId);
 
         var pet = petRepository.findById(petId)
                 .orElseThrow(() -> new IllegalArgumentException("pet not found"));
+
         return petConverter.convertToPetResponseDto(pet);
     }
 
     @Transactional
     public PetResponseDto createPet(CreatePetRequestDto requestDto) {
 
-        User user = userRepository.findById(requestDto.getUserId())
+        Long userId = currentUserService.getCurrentUserId();
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("user not found"));
 
         Pet pet = new Pet();
@@ -66,6 +72,7 @@ public class PetService {
     @Transactional
     public void updatePet(Long petId, UpdatePetRequestDto requestDto) {
 
+        ensurePetBelongsToCurrentUser(petId);
         var pet = petRepository.findById(petId)
                 .orElseThrow(() -> new IllegalArgumentException("pet not found"));
 
@@ -77,8 +84,29 @@ public class PetService {
         petRepository.save(pet);
     }
 
+    @Transactional
     public List<PetResponseDto> getAllPets() {
-        var pets = petRepository.findAll();
+        Long userId = currentUserService.getCurrentUserId();
+
+        var memberships = petMembershipRepository.findAllByUserId(userId);
+
+        var pets = memberships.stream()
+                .map(PetMembership::getPet)
+                .toList();
+
         return petConverter.convertToListPetResponseDto(pets);
+    }
+
+    private void ensurePetBelongsToCurrentUser(Long petId) {
+        Long userId = currentUserService.getCurrentUserId();
+
+        boolean hasAccess =
+                petMembershipRepository.existsByUserIdAndPetId(userId, petId);
+
+        if (!hasAccess) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "You do not have access to this pet"
+            );
+        }
     }
 }
