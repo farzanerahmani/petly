@@ -1,15 +1,26 @@
-import { API_BASE_URL } from '../../config/api';
+﻿import { API_BASE_URL } from '../../config/api';
 
-export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`);
+type ApiResponse<T> = {
+  data: T;
+};
+
+export async function apiGet<T>(
+  path: string,
+  accessToken?: string,
+): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: accessToken
+      ? { Authorization: `Bearer ${accessToken}` }
+      : {},
+  });
 
   if (!response.ok) {
     throw new Error(`API request failed: ${response.status}`);
   }
 
-  const json = await response.json();
+  const json = (await response.json()) as ApiResponse<T>;
 
-  return json as T;
+  return json.data;
 }
 
 export async function apiPost<TRequest, TResponse>(
@@ -28,7 +39,7 @@ export async function apiPost<TRequest, TResponse>(
     throw new Error(`API request failed: ${response.status}`);
   }
 
-  const json = await response.json();
+  const json = (await response.json()) as ApiResponse<TResponse>;
 
-  return json as TResponse;
+  return json.data;
 }

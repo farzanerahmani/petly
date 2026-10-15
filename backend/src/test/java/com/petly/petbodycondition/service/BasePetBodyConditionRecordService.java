@@ -1,5 +1,6 @@
 package com.petly.petbodycondition.service;
 
+import com.petly.auth.service.CurrentUserService;
 import com.petly.pet.controller.dto.CreatePetBodyConditionRecordRequestDto;
 import com.petly.pet.entity.Pet;
 import com.petly.pet.entity.PetBodyConditionRecord;
@@ -7,6 +8,7 @@ import com.petly.pet.entity.enums.ActivityLevel;
 import com.petly.pet.entity.enums.Gender;
 import com.petly.pet.entity.enums.Species;
 import com.petly.pet.repository.PetBodyConditionRecordRepository;
+import com.petly.pet.repository.PetMembershipRepository;
 import com.petly.pet.repository.PetRepository;
 import com.petly.pet.service.PetBodyConditionRecordService;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,12 +36,20 @@ public abstract class BasePetBodyConditionRecordService {
     @Mock
     protected PetBodyConditionRecordRepository petBodyConditionRecordRepository;
 
+    @Mock
+    protected  PetMembershipRepository petMembershipRepository;
+
+    @Mock
+    protected CurrentUserService currentUserService;
+
+
     @InjectMocks
     protected PetBodyConditionRecordService petBodyConditionRecordService;
 
     @BeforeEach
     void setup() {
-        petBodyConditionRecordService = new PetBodyConditionRecordService(petRepository, petBodyConditionRecordRepository);
+        petBodyConditionRecordService = new
+                PetBodyConditionRecordService(petRepository, petBodyConditionRecordRepository,petMembershipRepository,currentUserService);
     }
 
     protected Pet createMockedPet() {

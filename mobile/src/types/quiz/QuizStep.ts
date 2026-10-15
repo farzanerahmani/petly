@@ -1,6 +1,5 @@
-export type QuizStep =
+﻿export type QuizStep =
   | 'PARENT_NAME'
-  | 'PHONE_NUMBER'
   | 'PET_NAME'
   | 'SPECIES'
   | 'BREED'

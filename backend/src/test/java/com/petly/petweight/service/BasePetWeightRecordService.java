@@ -1,11 +1,13 @@
 package com.petly.petweight.service;
 
+import com.petly.auth.service.CurrentUserService;
 import com.petly.pet.controller.dto.CreatePetWeightRecordRequestDto;
 import com.petly.pet.entity.Pet;
 import com.petly.pet.entity.PetWeightRecord;
 import com.petly.pet.entity.enums.ActivityLevel;
 import com.petly.pet.entity.enums.Gender;
 import com.petly.pet.entity.enums.Species;
+import com.petly.pet.repository.PetMembershipRepository;
 import com.petly.pet.repository.PetRepository;
 import com.petly.pet.repository.PetWeightRecordRepository;
 import com.petly.pet.service.PetWeightRecordService;
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 /**
@@ -35,12 +38,18 @@ public abstract class BasePetWeightRecordService {
     @Mock
     protected PetWeightRecordRepository petWeightRecordRepository;
 
+    @Mock
+    protected PetMembershipRepository petMembershipRepository;
+
+    @Mock
+    protected CurrentUserService currentUserService;
+
     @InjectMocks
     protected PetWeightRecordService petWeightRecordService;
 
     @BeforeEach
     void setup() {
-        petWeightRecordService = new PetWeightRecordService(petWeightRecordRepository, petRepository);
+        petWeightRecordService = new PetWeightRecordService(petWeightRecordRepository, petRepository,petMembershipRepository,currentUserService);
     }
 
     protected Pet createMockedPet() {
