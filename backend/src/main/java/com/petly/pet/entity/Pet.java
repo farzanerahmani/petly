@@ -43,4 +43,7 @@ public class Pet extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "activity_level", length = 30)
     private ActivityLevel activityLevel;
+
+    @Column(name = "neutered")
+    private Boolean neutered;
 }

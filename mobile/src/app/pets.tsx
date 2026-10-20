@@ -2,6 +2,7 @@
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -30,7 +31,9 @@ export default function PetsScreen() {
         setPets(result);
       } catch (e) {
         setError(
-          e instanceof Error ? e.message : 'دریافت فهرست حیوان‌ها ناموفق بود.',
+          e instanceof Error
+            ? e.message
+            : 'دریافت فهرست حیوان‌ها ناموفق بود.',
         );
       } finally {
         setLoading(false);
@@ -50,7 +53,12 @@ export default function PetsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
       <Text style={styles.title}>حیوان‌های من</Text>
 
       {error ? (
@@ -59,12 +67,30 @@ export default function PetsScreen() {
         <Text style={styles.message}>هنوز حیوانی ثبت نشده است.</Text>
       ) : (
         pets.map((pet) => (
-          <View key={pet.id} style={styles.petCard}>
+          <Pressable
+            key={pet.id}
+            style={styles.petCard}
+            onPress={() =>
+              router.push({
+                pathname: '/pet/[petId]',
+                params: { petId: String(pet.id) },
+              })
+            }
+          >
             <Text style={styles.petName}>{pet.name}</Text>
+
             <Text style={styles.petDetails}>
-              {pet.species === 'DOG' ? 'سگ' : pet.species === 'CAT' ? 'گربه' : pet.species}
+              {pet.species === 'DOG'
+                ? 'سگ'
+                : pet.species === 'CAT'
+                  ? 'گربه'
+                  : pet.species}
             </Text>
-          </View>
+
+            <Text style={styles.openProfile}>
+              مشاهده‌ی پروفایل ←
+            </Text>
+          </Pressable>
         ))
       )}
 
@@ -74,7 +100,7 @@ export default function PetsScreen() {
       >
         <Text style={styles.buttonText}>افزودن حیوان</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -82,8 +108,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    padding: 24,
+  },
+  content: {
+    paddingHorizontal: 24,
     paddingTop: 64,
+    paddingBottom: 40,
+    flexGrow: 1,
   },
   center: {
     flex: 1,
@@ -123,6 +153,13 @@ const styles = StyleSheet.create({
     color: '#68736C',
     textAlign: 'right',
     marginTop: 6,
+  },
+  openProfile: {
+    color: '#237A4B',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'right',
+    marginTop: 12,
   },
   button: {
     minHeight: 52,

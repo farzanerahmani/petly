@@ -19,4 +19,5 @@ public class CreatePetRequestDto {
     private Gender gender;
     private LocalDate birthDate;
     private ActivityLevel activityLevel;
+    private Boolean neutered;
 }

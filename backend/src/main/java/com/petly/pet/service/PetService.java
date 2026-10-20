@@ -58,6 +58,7 @@ public class PetService {
         pet.setBreed(requestDto.getBreed());
         pet.setActivityLevel(requestDto.getActivityLevel());
         pet.setBirthDate(requestDto.getBirthDate());
+        pet.setNeutered(requestDto.getNeutered());
 
         Pet savedPet = petRepository.save(pet);
         PetMembership membership = new PetMembership();
