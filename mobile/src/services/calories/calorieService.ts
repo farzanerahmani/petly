@@ -5,7 +5,7 @@ import {
   type CalorieEstimate,
   type NeuteredStatus,
   type PetSpecies,
-} from './calorieCalculator';
+} from '../quiz/calorieCalculator';
 
 type SavePetCalorieRequest = {
   petId: number;

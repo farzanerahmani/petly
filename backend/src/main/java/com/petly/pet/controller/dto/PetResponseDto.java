@@ -1,8 +1,6 @@
 package com.petly.pet.controller.dto;
 
-import com.petly.pet.entity.enums.ActivityLevel;
-import com.petly.pet.entity.enums.Gender;
-import com.petly.pet.entity.enums.Species;
+import com.petly.pet.entity.enums.*;
 import lombok.Data;
 
 import java.time.Instant;
@@ -21,6 +19,12 @@ public class PetResponseDto {
     private Gender gender;
     private LocalDate birthDate;
     private ActivityLevel activityLevel;
+
+    private FoodTypePreference foodTypePreference;
+    private String currentFood;
+    private CurrentFoodSatisfaction currentFoodSatisfaction;
+
     private Instant createdAt;
-    private Instant updatedAt;;
+    private Instant updatedAt;
+
 }

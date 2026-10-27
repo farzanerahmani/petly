@@ -40,6 +40,9 @@ export function QuizScreen() {
     activityLevel: null,
     bodyConditionScore: null,
     dietaryRestrictions: [],
+    foodTypePreference: 'NO_PREFERENCE',
+    currentFood: '',
+    currentFoodSatisfaction: 'UNKNOWN',
   });
 
   const [error, setError] = useState('');
@@ -47,8 +50,7 @@ export function QuizScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
-  // برای جلوگیری از ساخت دوباره پت هنگام تلاش مجدد
-  // پس از خطا در ذخیره رکوردها
+  // جلوگیری از ساخت مجدد پت هنگام تلاش دوباره
   const [createdPetId, setCreatedPetId] = useState<number | null>(null);
   const [weightRecordSaved, setWeightRecordSaved] = useState(false);
   const [bodyConditionRecordSaved, setBodyConditionRecordSaved] =
@@ -100,13 +102,10 @@ export function QuizScreen() {
     switch (currentStep) {
       case 'PARENT_NAME':
         return 'اول از همه، اسمت چیه؟';
-
       case 'PET_NAME':
         return 'اسم پتت چیه؟';
-
       case 'BIRTH_DATE':
         return `${quizData.petName} متولد چه روزیه؟`;
-
       default:
         return '';
     }
@@ -134,48 +133,47 @@ export function QuizScreen() {
     try {
       let petId = createdPetId;
 
+      if (petId === null) {
+        const pet = await apiPostAuthenticated<
+          {
+            name: string;
+            species: 'DOG' | 'CAT';
+            breed: string;
+            gender: 'MALE' | 'FEMALE' | 'UNKNOWN';
+            birthDate: string;
+            activityLevel: 'LOW' | 'MODERATE' | 'HIGH' | 'VERY_HIGH';
+            neutered: boolean | null;
+              foodTypePreference: 'DRY' | 'WET' | 'BOTH' | 'NO_PREFERENCE';
+           currentFoodSatisfaction: 'YES' | 'PARTLY' | 'NO' | 'UNKNOWN';
+           currentFood: string,
+          },
+          PetResponseDto
+        >('/pets', {
+          name: quizData.petName.trim(),
+          species: quizData.species,
+          breed: quizData.breed ?? 'UNKNOWN',
+          gender: quizData.gender,
+          birthDate: quizData.birthDate,
+          activityLevel: quizData.activityLevel,
+          neutered:
+            quizData.neutered === 'UNKNOWN'
+              ? null
+              : quizData.neutered,
+          foodTypePreference: quizData.foodTypePreference ?? 'NO_PREFERENCE',
+          currentFood: quizData.currentFood.trim(),
+          currentFoodSatisfaction: quizData.currentFoodSatisfaction
+        });
 
+        petId = pet.id;
+        setCreatedPetId(petId);
+        console.log('Created pet ID:', petId);
+      }
 
-if (petId === null) {
-  const pet = await apiPostAuthenticated<
-    {
-      name: string;
-      species: 'DOG' | 'CAT';
-      breed: string;
-      gender: 'MALE' | 'FEMALE' | 'UNKNOWN';
-      birthDate: string;
-      activityLevel: 'LOW' | 'MODERATE' | 'HIGH' | 'VERY_HIGH';
-      neutered: boolean | null;
-    },
-    PetResponseDto
-  >('/pets', {
-    name: quizData.petName.trim(),
-    species: quizData.species,
-    breed: quizData.breed ?? 'UNKNOWN',
-    gender: quizData.gender,
-    birthDate: quizData.birthDate,
-    activityLevel: quizData.activityLevel,
-    neutered: quizData.neutered === 'UNKNOWN'
-      ? null
-      : quizData.neutered === 'YES',
-  });
+      if (petId === null) {
+        throw new Error('شناسه پت ایجاد نشده است.');
+      }
 
-  // ابتدا شناسه را از پاسخ بک‌اند بگیر
-  petId = pet.id;
-
-  // سپس در state ذخیره کن
-  setCreatedPetId(petId);
-
-  console.log('Created pet ID:', petId);
-}
-
-// بررسی باید بعد از گرفتن شناسه انجام شود
-if (petId === null) {
-  throw new Error('شناسه پت ایجاد نشده است.');
-}
-
-
-      // تاریخ محلی با فرمت مورد انتظار LocalDate در بک‌اند
+      // تاریخ محلی با قالب مورد انتظار بک‌اند
       const now = new Date();
       const recordedDate = [
         now.getFullYear(),
@@ -212,10 +210,7 @@ if (petId === null) {
       setShowResult(true);
     } catch (saveError) {
       console.error('Failed to save quiz data:', saveError);
-
-      setError(
-        'ذخیرهٔ اطلاعات با مشکل مواجه شد. لطفاً دوباره تلاش کن.',
-      );
+      setError('ذخیرهٔ اطلاعات با مشکل مواجه شد. لطفاً دوباره تلاش کن.');
     } finally {
       setIsProcessing(false);
     }
@@ -224,130 +219,120 @@ if (petId === null) {
   const goToNextStep = () => {
     setError('');
 
-    if (currentStep === 'PARENT_NAME') {
-      if (!quizData.parentFirstName.trim()) {
-        setError('لطفاً اسمت رو وارد کن.');
+    switch (currentStep) {
+      case 'PARENT_NAME':
+        if (!quizData.parentFirstName.trim()) {
+          setError('لطفاً اسمت رو وارد کن.');
+          return;
+        }
+        setCurrentStep('PET_NAME');
         return;
-      }
 
-      setCurrentStep('PET_NAME');
-      return;
-    }
-
-    if (currentStep === 'PET_NAME') {
-      if (!quizData.petName.trim()) {
-        setError('لطفاً اسم پتت رو وارد کن.');
+      case 'PET_NAME':
+        if (!quizData.petName.trim()) {
+          setError('لطفاً اسم پتت رو وارد کن.');
+          return;
+        }
+        setCurrentStep('SPECIES');
         return;
-      }
 
-      setCurrentStep('SPECIES');
-      return;
-    }
-
-    if (currentStep === 'SPECIES') {
-      if (!quizData.species) {
-        setError('لطفاً مشخص کن پتت سگ هست یا گربه.');
+      case 'SPECIES':
+        if (!quizData.species) {
+          setError('لطفاً مشخص کن پتت سگ هست یا گربه.');
+          return;
+        }
+        setQuizData(previous => ({
+          ...previous,
+          breed: null,
+          activityLevel: null,
+        }));
+        setCurrentStep('BREED');
         return;
-      }
 
-      setQuizData(previous => ({
-        ...previous,
-        breed: null,
-        activityLevel: null,
-      }));
-
-      setCurrentStep('BREED');
-      return;
-    }
-
-    if (currentStep === 'BREED') {
-      if (!quizData.breed) {
-        setError('لطفاً نژاد پتت رو انتخاب کن.');
+      case 'BREED':
+        if (!quizData.breed) {
+          setError('لطفاً نژاد پتت رو انتخاب کن.');
+          return;
+        }
+        setCurrentStep('BIRTH_DATE');
         return;
-      }
 
-      setCurrentStep('BIRTH_DATE');
-      return;
-    }
-
-    if (currentStep === 'BIRTH_DATE') {
-      if (!quizData.birthDate) {
-        setError('لطفاً تاریخ تولد پتت رو انتخاب کن.');
+      case 'BIRTH_DATE':
+        if (!quizData.birthDate) {
+          setError('لطفاً تاریخ تولد پتت رو انتخاب کن.');
+          return;
+        }
+        setCurrentStep('GENDER');
         return;
-      }
 
-      setCurrentStep('GENDER');
-      return;
-    }
-
-    if (currentStep === 'GENDER') {
-      if (!quizData.gender) {
-        setError('لطفاً جنسیت پتت رو انتخاب کن.');
+      case 'GENDER':
+        if (!quizData.gender) {
+          setError('لطفاً جنسیت پتت رو انتخاب کن.');
+          return;
+        }
+        setCurrentStep('NEUTERED');
         return;
-      }
 
-      setCurrentStep('NEUTERED');
-      return;
-    }
-
-    if (currentStep === 'NEUTERED') {
-      if (quizData.neutered === null) {
-        setError('لطفاً مشخص کن پتت عقیم شده یا نه.');
+      case 'NEUTERED':
+        if (quizData.neutered === null) {
+          setError('لطفاً مشخص کن پتت عقیم شده یا نه.');
+          return;
+        }
+        setCurrentStep('WEIGHT');
         return;
-      }
 
-      setCurrentStep('WEIGHT');
-      return;
-    }
-
-    if (currentStep === 'WEIGHT') {
-      if (
-        quizData.weightKg === null ||
-        !Number.isFinite(quizData.weightKg) ||
-        quizData.weightKg <= 0
-      ) {
-        setError('لطفاً وزن معتبر پتت رو وارد کن.');
+      case 'WEIGHT':
+        if (
+          quizData.weightKg === null ||
+          !Number.isFinite(quizData.weightKg) ||
+          quizData.weightKg <= 0
+        ) {
+          setError('لطفاً وزن معتبر پتت رو وارد کن.');
+          return;
+        }
+        setCurrentStep('ACTIVITY');
         return;
-      }
 
-      setCurrentStep('ACTIVITY');
-      return;
-    }
-
-    if (currentStep === 'ACTIVITY') {
-      if (!quizData.activityLevel) {
-        setError('لطفاً میزان فعالیت پتت رو انتخاب کن.');
+      case 'ACTIVITY':
+        if (!quizData.activityLevel) {
+          setError('لطفاً میزان فعالیت پتت رو انتخاب کن.');
+          return;
+        }
+        setCurrentStep('BODY_CONDITION');
         return;
-      }
 
-      setCurrentStep('BODY_CONDITION');
-      return;
-    }
-
-    if (currentStep === 'BODY_CONDITION') {
-      if (quizData.bodyConditionScore === null) {
-        setError('لطفاً وضعیت بدنی پتت رو انتخاب کن.');
+      case 'BODY_CONDITION':
+        if (quizData.bodyConditionScore === null) {
+          setError('لطفاً وضعیت بدنی پتت رو انتخاب کن.');
+          return;
+        }
+        setCurrentStep('DIETARY_RESTRICTIONS');
         return;
-      }
 
-      setCurrentStep('DIETARY_RESTRICTIONS');
-      return;
-    }
-
-    if (currentStep === 'DIETARY_RESTRICTIONS') {
-      if (quizData.dietaryRestrictions.length === 0) {
-        setError('لطفاً حداقل یکی از گزینه‌ها رو انتخاب کن.');
+      case 'DIETARY_RESTRICTIONS':
+        if (quizData.dietaryRestrictions.length === 0) {
+          setError('لطفاً حداقل یکی از گزینه‌ها رو انتخاب کن.');
+          return;
+        }
+        setCurrentStep('FOOD_TYPE');
         return;
-      }
 
-      void saveQuizData();
+      case 'FOOD_TYPE':
+        setCurrentStep('CURRENT_FOOD');
+        return;
+
+      case 'CURRENT_FOOD':
+        setCurrentStep('FOOD_SATISFACTION');
+        return;
+
+      case 'FOOD_SATISFACTION':
+        void saveQuizData();
+        return;
     }
   };
 
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
+    container: { flex: 1 },
     content: {
       flex: 1,
       justifyContent: 'center',
@@ -456,25 +441,32 @@ if (petId === null) {
       textAlign: 'right',
       marginBottom: 24,
     },
+    foodInput: {
+      borderWidth: 1,
+      borderColor: '#DDD',
+      borderRadius: 12,
+      padding: 14,
+      fontSize: 16,
+      textAlign: 'right',
+      marginBottom: 16,
+    },
   });
 
-
-if (showResult) {
-  return (
-    <QuizResultScreen
-    petId={createdPetId}
-      petName={quizData.petName}
-      species={quizData.species}
-      birthDate={quizData.birthDate}
-      neutered={quizData.neutered}
-      weightKg={quizData.weightKg}
-      activityLevel={quizData.activityLevel}
-      bodyConditionScore={quizData.bodyConditionScore}
-      dietaryRestrictions={quizData.dietaryRestrictions}
-    />
-  );
-}
-
+  if (showResult) {
+    return (
+      <QuizResultScreen
+        petId={createdPetId}
+        petName={quizData.petName}
+        species={quizData.species}
+        birthDate={quizData.birthDate}
+        neutered={quizData.neutered}
+        weightKg={quizData.weightKg}
+        activityLevel={quizData.activityLevel}
+        bodyConditionScore={quizData.bodyConditionScore}
+        dietaryRestrictions={quizData.dietaryRestrictions}
+      />
+    );
+  }
 
   if (isProcessing) {
     return (
@@ -488,8 +480,8 @@ if (showResult) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {currentStep === 'PARENT_NAME' ||
-        currentStep === 'PET_NAME' ? (
+        {(currentStep === 'PARENT_NAME' ||
+          currentStep === 'PET_NAME') && (
           <QuizStep
             question={getQuestion()}
             value={
@@ -507,14 +499,13 @@ if (showResult) {
             }
             showTextInput
           />
-        ) : null}
+        )}
 
-        {currentStep === 'SPECIES' ? (
+        {currentStep === 'SPECIES' && (
           <View style={styles.speciesQuestion}>
             <Text style={styles.speciesText}>
               {quizData.petName} یه
             </Text>
-
             <QuizSelect
               value={quizData.species}
               options={[
@@ -528,17 +519,15 @@ if (showResult) {
                 }))
               }
             />
-
             <Text style={styles.speciesText}>هست.</Text>
           </View>
-        ) : null}
+        )}
 
-        {currentStep === 'BREED' ? (
+        {currentStep === 'BREED' && (
           <View style={styles.speciesQuestion}>
             <Text style={styles.speciesText}>
               {quizData.petName} یه
             </Text>
-
             <QuizSelect
               value={quizData.breed}
               options={breedOptions}
@@ -549,12 +538,11 @@ if (showResult) {
                 }))
               }
             />
-
             <Text style={styles.speciesText}>هست.</Text>
           </View>
-        ) : null}
+        )}
 
-        {currentStep === 'BIRTH_DATE' ? (
+        {currentStep === 'BIRTH_DATE' && (
           <View style={styles.birthDateQuestion}>
             <Text style={styles.speciesText}>
               {quizData.petName} متولد چه روزیه؟
@@ -574,7 +562,7 @@ if (showResult) {
               که یادت میاد رو وارد کن.
             </Text>
 
-            {showDatePicker ? (
+            {showDatePicker && (
   <DateTimePicker
     value={
       quizData.birthDate
@@ -584,14 +572,12 @@ if (showResult) {
     mode="date"
     display="default"
     maximumDate={new Date()}
-    onValueChange={(event, selectedDate) => {
+    onValueChange={(_event, selectedDate) => {
       if (selectedDate) {
         const year = selectedDate.getFullYear();
-
         const month = String(
           selectedDate.getMonth() + 1,
         ).padStart(2, '0');
-
         const day = String(
           selectedDate.getDate(),
         ).padStart(2, '0');
@@ -601,23 +587,18 @@ if (showResult) {
           birthDate: `${year}-${month}-${day}`,
         }));
       }
-
-      setShowDatePicker(false);
     }}
-    onDismiss={() => {
-      setShowDatePicker(false);
-    }}
+    onDismiss={() => setShowDatePicker(false)}
   />
-) : null}
+)}
           </View>
-        ) : null}
+        )}
 
-        {currentStep === 'GENDER' ? (
+        {currentStep === 'GENDER' && (
           <View style={styles.speciesQuestion}>
             <Text style={styles.speciesText}>
               {quizData.petName} یه
             </Text>
-
             <QuizSelect
               value={quizData.gender}
               options={[
@@ -632,17 +613,15 @@ if (showResult) {
                 }))
               }
             />
-
             <Text style={styles.speciesText}>هست.</Text>
           </View>
-        ) : null}
+        )}
 
-        {currentStep === 'NEUTERED' ? (
+        {currentStep === 'NEUTERED' && (
           <View style={styles.neuteredQuestion}>
             <Text style={styles.genderTitle}>
               {quizData.petName} عقیم شده؟
             </Text>
-
             <QuizSelect
               value={
                 quizData.neutered === null
@@ -671,60 +650,56 @@ if (showResult) {
               }
             />
           </View>
-        ) : null}
+        )}
 
-        {currentStep === 'WEIGHT' ? (
+        {currentStep === 'WEIGHT' && (
           <View style={styles.weightQuestion}>
             <Text style={styles.weightText}>
               {quizData.petName} حدود
             </Text>
-
             <TextInput
               style={styles.weightInput}
               value={
-                quizData.weightKg !== null
+                quizData.weightKg !== null &&
+                Number.isFinite(quizData.weightKg)
                   ? String(quizData.weightKg)
                   : ''
               }
               onChangeText={value => {
-                const normalizedValue = value.replace(',', '.');
-                const parsedValue =
-                  normalizedValue.trim() === ''
+                const normalized = value.replace(',', '.');
+                const parsed =
+                  normalized.trim() === ''
                     ? null
-                    : Number(normalizedValue);
+                    : Number(normalized);
 
                 setQuizData(previous => ({
                   ...previous,
                   weightKg:
-                    parsedValue === null ||
-                    !Number.isFinite(parsedValue)
-                      ? parsedValue === null
-                        ? null
-                        : Number.NaN
-                      : parsedValue,
+                    parsed === null
+                      ? null
+                      : Number.isFinite(parsed)
+                        ? parsed
+                        : Number.NaN,
                 }));
               }}
               keyboardType="decimal-pad"
               placeholder="12.5"
             />
-
             <Text style={styles.weightText}>کیلو وزنشه.</Text>
-
             <Text style={styles.weightHint}>
               وزن دقیقش رو نمی‌دونی؟ نزدیک‌ترین عددی که حدس می‌زنی رو
               وارد کن.
             </Text>
           </View>
-        ) : null}
+        )}
 
-        {currentStep === 'ACTIVITY' ? (
+        {currentStep === 'ACTIVITY' && (
           <View style={styles.activityQuestion}>
             <Text style={styles.activityText}>
               {quizData.species === 'DOG'
                 ? `${quizData.petName} روزانه چقدر`
                 : `${quizData.petName} معمولاً چقدر`}
             </Text>
-
             <QuizSelect
               value={quizData.activityLevel}
               options={activityOptions}
@@ -739,21 +714,19 @@ if (showResult) {
                 }))
               }
             />
-
             <Text style={styles.activityText}>
               {quizData.species === 'DOG'
                 ? 'فعالیت داره؟'
                 : 'فعاله؟'}
             </Text>
           </View>
-        ) : null}
+        )}
 
-        {currentStep === 'BODY_CONDITION' ? (
+        {currentStep === 'BODY_CONDITION' && (
           <View style={styles.bodyConditionQuestion}>
             <Text style={styles.bodyConditionTitle}>
               به نظرت فرم بدن {quizData.petName} چطوره؟
             </Text>
-
             <View style={styles.bodyConditionOptions}>
               <BodyConditionOption
                 label="لاغر"
@@ -767,7 +740,6 @@ if (showResult) {
                   }))
                 }
               />
-
               <BodyConditionOption
                 label="مناسب"
                 score={5}
@@ -780,7 +752,6 @@ if (showResult) {
                   }))
                 }
               />
-
               <BodyConditionOption
                 label="کمی اضافه‌وزن"
                 score={7}
@@ -795,9 +766,9 @@ if (showResult) {
               />
             </View>
           </View>
-        ) : null}
+        )}
 
-        {currentStep === 'DIETARY_RESTRICTIONS' ? (
+        {currentStep === 'DIETARY_RESTRICTIONS' && (
           <View style={styles.dietaryQuestion}>
             <Text style={styles.dietaryTitle}>
               {quizData.petName} به غذایی حساسیت داره؟
@@ -813,7 +784,6 @@ if (showResult) {
                 onPress={() => {
                   setQuizData(previous => {
                     const current = previous.dietaryRestrictions;
-
                     const updated = current.includes(option.value)
                       ? current.filter(item => item !== option.value)
                       : [
@@ -841,7 +811,84 @@ if (showResult) {
               }
             />
           </View>
-        ) : null}
+        )}
+
+        {currentStep === 'FOOD_TYPE' && (
+          <View style={styles.dietaryQuestion}>
+            <Text style={styles.dietaryTitle}>
+              برای {quizData.petName} چه نوع غذایی ترجیح می‌دی؟
+            </Text>
+            <QuizSelect
+              value={quizData.foodTypePreference}
+              options={[
+                { label: 'غذای خشک', value: 'DRY' },
+                { label: 'غذای تر', value: 'WET' },
+                { label: 'هر دو', value: 'BOTH' },
+                { label: 'فرقی نمی‌کنه', value: 'NO_PREFERENCE' },
+              ]}
+              onChange={value =>
+                setQuizData(previous => ({
+                  ...previous,
+                  foodTypePreference: value as
+                    | 'DRY'
+                    | 'WET'
+                    | 'BOTH'
+                    | 'NO_PREFERENCE',
+                }))
+              }
+            />
+          </View>
+        )}
+
+        {currentStep === 'CURRENT_FOOD' && (
+          <View style={styles.dietaryQuestion}>
+            <Text style={styles.dietaryTitle}>
+              الان {quizData.petName} چه غذایی می‌خوره؟
+            </Text>
+            <TextInput
+              style={styles.foodInput}
+              value={quizData.currentFood}
+              onChangeText={value =>
+                setQuizData(previous => ({
+                  ...previous,
+                  currentFood: value,
+                }))
+              }
+              placeholder="مثلاً نام برند یا مدل غذا"
+              maxLength={200}
+            />
+            <Text style={styles.birthDateHint}>
+              اگه اسم غذا رو نمی‌دونی، می‌تونی خالی بذاری.
+            </Text>
+          </View>
+        )}
+
+        {currentStep === 'FOOD_SATISFACTION' && (
+          <View style={styles.dietaryQuestion}>
+            <Text style={styles.dietaryTitle}>
+              از غذایی که الان {quizData.petName} می‌خوره راضی هستی؟
+            </Text>
+            <QuizSelect
+              value={quizData.currentFoodSatisfaction}
+              options={[
+                { label: 'بله، راضی‌ام', value: 'YES' },
+                { label: 'تا حدودی', value: 'PARTLY' },
+                { label: 'نه، راضی نیستم', value: 'NO' },
+                { label: 'هنوز مطمئن نیستم', value: 'UNKNOWN' },
+              ]}
+              onChange={value =>
+                setQuizData(previous => ({
+                  ...previous,
+                  currentFoodSatisfaction: value as
+                    | 'YES'
+                    | 'PARTLY'
+                    | 'NO'
+                    | 'UNKNOWN',
+                }))
+              }
+            />
+          </View>
+        )}
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 

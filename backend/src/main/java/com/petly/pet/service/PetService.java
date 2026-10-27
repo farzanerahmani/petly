@@ -6,6 +6,8 @@ import com.petly.pet.controller.dto.PetResponseDto;
 import com.petly.pet.controller.dto.UpdatePetRequestDto;
 import com.petly.pet.entity.Pet;
 import com.petly.pet.entity.PetMembership;
+import com.petly.pet.entity.enums.CurrentFoodSatisfaction;
+import com.petly.pet.entity.enums.FoodTypePreference;
 import com.petly.pet.entity.enums.PetMembershipRole;
 import com.petly.pet.repository.PetMembershipRepository;
 import com.petly.pet.repository.PetRepository;
@@ -59,6 +61,23 @@ public class PetService {
         pet.setActivityLevel(requestDto.getActivityLevel());
         pet.setBirthDate(requestDto.getBirthDate());
         pet.setNeutered(requestDto.getNeutered());
+        pet.setFoodTypePreference(
+                requestDto.getFoodTypePreference() != null
+                        ? requestDto.getFoodTypePreference()
+                        : FoodTypePreference.NO_PREFERENCE
+        );
+
+        pet.setCurrentFood(
+                requestDto.getCurrentFood() == null
+                        ? null
+                        : requestDto.getCurrentFood().trim()
+        );
+
+        pet.setCurrentFoodSatisfaction(
+                requestDto.getCurrentFoodSatisfaction() != null
+                        ? requestDto.getCurrentFoodSatisfaction()
+                        : CurrentFoodSatisfaction.UNKNOWN
+        );
 
         Pet savedPet = petRepository.save(pet);
         PetMembership membership = new PetMembership();

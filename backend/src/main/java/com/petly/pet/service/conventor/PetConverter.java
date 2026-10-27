@@ -23,6 +23,9 @@ public class PetConverter {
         responseDto.setGender(pet.getGender());
         responseDto.setActivityLevel(pet.getActivityLevel());
         responseDto.setBirthDate(pet.getBirthDate());
+        responseDto.setCurrentFood(pet.getCurrentFood());
+        responseDto.setCurrentFoodSatisfaction(pet.getCurrentFoodSatisfaction());
+        responseDto.setFoodTypePreference(pet.getFoodTypePreference());
         responseDto.setCreatedAt(pet.getCreatedAt());
         responseDto.setUpdatedAt(pet.getUpdatedAt());
         return responseDto;

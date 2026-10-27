@@ -105,6 +105,8 @@ export default function WeightRecordsScreen() {
       ];
 
       timeline.sort((a, b) => b.date.localeCompare(a.date));
+      console.log('Weight records:', JSON.stringify(weights));
+console.log('Body condition records:', JSON.stringify(conditions));
       setItems(timeline);
     } catch (e) {
       setError(
@@ -152,8 +154,11 @@ export default function WeightRecordsScreen() {
         <Text style={styles.muted}>هنوز رکوردی ثبت نشده است.</Text>
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
-          {items.map((item, index) => (
-            <View key={item.id ?? index} style={styles.card}>
+          {items.map((item) => (
+  <View
+    key={`${item.type}-${item.id}`}
+    style={styles.card}
+  >
               <Text style={styles.date}>{formatDate(item.date)}</Text>
 
               {item.type === 'weight' ? (

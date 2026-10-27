@@ -10,4 +10,7 @@
   activityLevel: 'LOW' | 'MODERATE' | 'HIGH' | 'VERY_HIGH' | null;
   bodyConditionScore: number | null;
   dietaryRestrictions: string[];
+  foodTypePreference: 'DRY' | 'WET' | 'BOTH' | 'NO_PREFERENCE';
+currentFood: string;
+currentFoodSatisfaction: 'YES' | 'PARTLY' | 'NO' | 'UNKNOWN';
 };

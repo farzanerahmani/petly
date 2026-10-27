@@ -1,9 +1,7 @@
 package com.petly.pet.entity;
 
 import com.petly.common.entity.AuditableEntity;
-import com.petly.pet.entity.enums.ActivityLevel;
-import com.petly.pet.entity.enums.Gender;
-import com.petly.pet.entity.enums.Species;
+import com.petly.pet.entity.enums.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,4 +44,15 @@ public class Pet extends AuditableEntity {
 
     @Column(name = "neutered")
     private Boolean neutered;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "food_type_preference", length = 30)
+    private FoodTypePreference foodTypePreference = FoodTypePreference.NO_PREFERENCE;
+
+    @Column(name = "current_food", length = 200)
+    private String currentFood;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "current_food_satisfaction", length = 20)
+    private CurrentFoodSatisfaction currentFoodSatisfaction = CurrentFoodSatisfaction.UNKNOWN;
 }

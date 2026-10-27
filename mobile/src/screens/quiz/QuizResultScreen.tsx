@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 
 import { apiPostAuthenticated } from '../../services/api/client';
+import { FoodRecommendationsScreen } from '../foods/FoodRecommendationsScreen';
 
 import type {
   ActivityLevel,
@@ -21,9 +22,8 @@ type CalorieEstimate = {
   merKcal: number;
 };
 
-
 type QuizResultScreenProps = {
-   petId: number | null;
+  petId: number | null;
   petName: string;
   species: PetSpecies | null;
   birthDate: string | null;
@@ -67,6 +67,13 @@ export function QuizResultScreen({
   bodyConditionScore,
   dietaryRestrictions,
 }: QuizResultScreenProps) {
+  const [calorieEstimate, setCalorieEstimate] =
+    useState<CalorieEstimate | null>(null);
+
+  const [loadingCalories, setLoadingCalories] = useState(false);
+  const [calorieError, setCalorieError] = useState<string | null>(null);
+  const [showRecommendations, setShowRecommendations] = useState(false);
+
   const activityLabel = activityLevel
     ? activityLabels[activityLevel]
     : 'نامشخص';
@@ -79,90 +86,124 @@ export function QuizResultScreen({
   const dietaryRestrictionLabel =
     dietaryRestrictions.includes('NONE')
       ? 'موردی ثبت نشده'
-      : dietaryRestrictions
-          .map(item => dietaryRestrictionLabels[item] ?? item)
-          .join('، ');
-const [calorieEstimate, setCalorieEstimate] =
-  useState<CalorieEstimate | null>(null);
+      : dietaryRestrictions.length > 0
+        ? dietaryRestrictions
+            .map(item => dietaryRestrictionLabels[item] ?? item)
+            .join('، ')
+        : 'نامشخص';
 
-const [loadingCalories, setLoadingCalories] = useState(false);
-const [calorieError, setCalorieError] = useState<string | null>(null);
-
-useEffect(() => {
-  if (
-    petId === null ||
-    !species ||
-    !birthDate ||
-    neutered === null ||
-    neutered === 'UNKNOWN' ||
-    weightKg === null ||
-    !activityLevel
-  ) {
-    setCalorieEstimate(null);
-    setCalorieError(null);
-    setLoadingCalories(false);
-    return;
-  }
-
-  let cancelled = false;
-
-  async function loadCalories() {
-    try {
-      setLoadingCalories(true);
+  useEffect(() => {
+    if (
+      petId === null ||
+      !species ||
+      !birthDate ||
+      neutered === null ||
+      neutered === 'UNKNOWN' ||
+      weightKg === null ||
+      !activityLevel
+    ) {
+      setCalorieEstimate(null);
       setCalorieError(null);
+      setLoadingCalories(false);
+      return;
+    }
 
-      const result = await apiPostAuthenticated<
-        {
-          petId: number;
-          species: PetSpecies;
-          weightKg: number;
-          birthDate: string;
-          neutered: boolean;
-          activityLevel: ActivityLevel;
-        },
-        CalorieEstimate
-      >('/calories/calculate', {
-        petId,
-        species,
-        weightKg,
-        birthDate,
-        neutered,
-        activityLevel,
-      });
+    let cancelled = false;
 
-      if (!cancelled) {
-        setCalorieEstimate(result);
-      }
-    } catch (error) {
-      if (!cancelled) {
-        setCalorieEstimate(null);
-        setCalorieError(
-          error instanceof Error
-            ? error.message
-            : 'دریافت کالری ناموفق بود.',
-        );
-      }
-    } finally {
-      if (!cancelled) {
-        setLoadingCalories(false);
+    async function loadCalories() {
+      try {
+        setLoadingCalories(true);
+        setCalorieError(null);
+
+       const currentPetId = petId;
+       const currentSpecies = species;
+       const currentWeightKg = weightKg;
+       const currentBirthDate =birthDate;
+       const currentneutered =neutered;
+       const currentActivityLevel =activityLevel;
+
+if (currentPetId === null  || currentSpecies === null || currentWeightKg === null || currentBirthDate === null || currentneutered  === null ||
+      currentneutered === 'UNKNOWN' || currentActivityLevel === null) {
+  return;
+}
+
+const result = await apiPostAuthenticated<
+  {
+    petId: number;
+    species: PetSpecies;
+    weightKg: number;
+    birthDate: string;
+    neutered: boolean;
+    activityLevel: ActivityLevel;
+  },
+  CalorieEstimate
+>('/calories/calculate', {
+  petId: currentPetId,
+  species:currentSpecies,
+  weightKg:currentWeightKg,
+  birthDate:currentBirthDate,
+  neutered:currentneutered,
+  activityLevel:currentActivityLevel,
+});
+
+        if (!cancelled) {
+          setCalorieEstimate(result);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setCalorieEstimate(null);
+          setCalorieError(
+            error instanceof Error
+              ? error.message
+              : 'دریافت کالری ناموفق بود.',
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingCalories(false);
+        }
       }
     }
+
+    void loadCalories();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    petId,
+    species,
+    birthDate,
+    neutered,
+    weightKg,
+    activityLevel,
+  ]);
+
+  if (showRecommendations) {
+    if (petId === null) {
+      return (
+        <View style={styles.container}>
+          <Text style={styles.info}>
+            شناسه پت پیدا نشد. لطفاً دوباره مراحل ثبت پت را انجام بده.
+          </Text>
+
+          <Pressable
+            style={styles.continueButton}
+            onPress={() => setShowRecommendations(false)}
+          >
+            <Text style={styles.continueButtonText}>بازگشت</Text>
+          </Pressable>
+        </View>
+      );
+    }
+
+    return (
+      <FoodRecommendationsScreen
+        petId={petId}
+        onBack={() => setShowRecommendations(false)}
+      />
+    );
   }
-
-  void loadCalories();
-
-  return () => {
-    cancelled = true;
-  };
-}, [
-  petId,
-  species,
-  birthDate,
-  neutered,
-  weightKg,
-  activityLevel,
-]);
-
 
   return (
     <View style={styles.container}>
@@ -192,43 +233,52 @@ useEffect(() => {
       </Text>
 
       {loadingCalories ? (
-  <View style={styles.calorieCard}>
-    <ActivityIndicator color="#237A4B" />
-    <Text style={styles.info}>در حال محاسبه کالری...</Text>
-  </View>
-) : calorieEstimate ? (
-  <View style={styles.calorieCard}>
-    <Text style={styles.calorieTitle}>کالری تخمینی روزانه</Text>
+        <View style={styles.calorieCard}>
+          <ActivityIndicator color="#237A4B" />
+          <Text style={styles.info}>در حال محاسبه کالری...</Text>
+        </View>
+      ) : calorieEstimate ? (
+        <View style={styles.calorieCard}>
+          <Text style={styles.calorieTitle}>
+            کالری تخمینی روزانه
+          </Text>
 
-    <Text style={styles.calorieValue}>
-      حدود {calorieEstimate.merKcal}
-    </Text>
+          <Text style={styles.calorieValue}>
+            حدود {calorieEstimate.merKcal}
+          </Text>
 
-    <Text style={styles.calorieUnit}>کیلوکالری در روز</Text>
+          <Text style={styles.calorieUnit}>
+            کیلوکالری در روز
+          </Text>
 
-    <Text style={styles.rerText}>
-      انرژی پایه در حالت استراحت: حدود {calorieEstimate.rerKcal}
-      {' '}کیلوکالری در روز
-    </Text>
+          <Text style={styles.rerText}>
+            انرژی پایه در حالت استراحت: حدود {calorieEstimate.rerKcal}
+            {' '}کیلوکالری در روز
+          </Text>
 
-    <Text style={styles.rerText}>
-      ضریب محاسبه: {calorieEstimate.factor}
-    </Text>
+          <Text style={styles.rerText}>
+            ضریب محاسبه: {calorieEstimate.factor}
+          </Text>
 
-    <Text style={styles.disclaimer}>
-      این مقدار تخمینی است و نیاز واقعی پت ممکن است متفاوت باشد.
-      برای برنامه تغذیه دقیق با دامپزشک مشورت کن.
-    </Text>
-  </View>
-) : (
-  <Text style={styles.info}>
-    {calorieError ??
-      'برای محاسبه کالری، اطلاعات پت باید کامل باشد.'}
-  </Text>
-)}
+          <Text style={styles.disclaimer}>
+            این مقدار تخمینی است و نیاز واقعی پت ممکن است متفاوت باشد.
+            برای برنامه تغذیه دقیق با دامپزشک مشورت کن.
+          </Text>
+        </View>
+      ) : (
+        <Text style={styles.info}>
+          {calorieError ??
+            'برای محاسبه کالری، اطلاعات پت باید کامل باشد.'}
+        </Text>
+      )}
 
-      <Pressable style={styles.continueButton}>
-        <Text style={styles.continueButtonText}>ادامه</Text>
+      <Pressable
+        style={styles.continueButton}
+        onPress={() => setShowRecommendations(true)}
+      >
+        <Text style={styles.continueButtonText}>
+          مشاهده غذاهای پیشنهادی
+        </Text>
       </Pressable>
     </View>
   );
@@ -308,7 +358,7 @@ const styles = StyleSheet.create({
   continueButton: {
     marginTop: 28,
     paddingVertical: 16,
-    paddingHorizontal: 48,
+    paddingHorizontal: 24,
     borderRadius: 12,
     backgroundColor: '#237A4B',
     alignItems: 'center',
