@@ -21,6 +21,8 @@ petly:
   jwt:
     secret: ${PETLY_JWT_SECRET}
     expiration-seconds: 900
+  scraper:
+    api-key: ${PETLY_SCRAPER_API_KEY}
 
 server:
   address: 0.0.0.0

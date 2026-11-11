@@ -26,6 +26,14 @@ import java.time.Instant;
                 @Index(
                         name = "idx_food_prices_available",
                         columnList = "food_product_id, is_available, checked_at DESC"
+                ),
+                @Index(
+                        name = "idx_food_prices_listing_checked",
+                        columnList = "food_listing_id, checked_at DESC"
+                ),
+                @Index(
+                        name = "idx_food_prices_listing_check",
+                        columnList = "listing_check_id"
                 )
         }
 )
@@ -34,9 +42,43 @@ import java.time.Instant;
 @NoArgsConstructor
 public class FoodPrice extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "food_product_id", nullable = false)
+    /*
+     * Canonical product is optional.
+     * A price can be stored before product matching is approved.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "food_product_id", nullable = true)
     private FoodProduct foodProduct;
+
+    /*
+     * The original shop listing that produced this price.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "food_listing_id")
+    private FoodListing foodListing;
+
+    @Column(name = "listing_check_id")
+    private Long listingCheckId;
+
+    /*
+     * The scraper observation associated with this price.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumns({
+            @JoinColumn(
+                    name = "listing_check_id",
+                    referencedColumnName = "id",
+                    insertable = false,
+                    updatable = false
+            ),
+            @JoinColumn(
+                    name = "food_listing_id",
+                    referencedColumnName = "food_listing_id",
+                    insertable = false,
+                    updatable = false
+            )
+    })
+    private FoodListingCheck listingCheck;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_shop_id")
@@ -45,13 +87,21 @@ public class FoodPrice extends BaseEntity {
     @Column(name = "seller_name", nullable = false, length = 200)
     private String sellerName;
 
-    @Column(name = "price_amount", nullable = false, precision = 14, scale = 2)
+    /*
+     * Null means the scraper did not provide a valid price.
+     * Zero is never used to represent an unknown price.
+     */
+    @Column(name = "price_amount", precision = 14, scale = 2)
     private BigDecimal priceAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 3)
+    @Column(name = "currency")
     private FoodCurrency currency;
 
+    /*
+     * Legacy field retained for backward compatibility.
+     * New package weight data belongs to FoodVariant.
+     */
     @Column(name = "package_weight_grams")
     private Integer packageWeightGrams;
 

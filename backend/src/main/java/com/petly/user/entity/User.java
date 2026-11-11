@@ -1,6 +1,7 @@
 package com.petly.user.entity;
 
 import com.petly.common.entity.AuditableEntity;
+import com.petly.user.entity.enums.SystemRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,5 +21,7 @@ public class User extends AuditableEntity {
     @Column(name = "phone_number", nullable = false, length = 20, unique = true)
     private String phoneNumber;
 
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "system_role", nullable = false, length = 20)
+    private SystemRole systemRole = SystemRole.USER;
 }

@@ -17,8 +17,7 @@ import java.time.Instant;
 @Setter
 public abstract class AuditableEntity extends BaseEntity {
 
-
-    @Column(name = "updated_at", nullable = false, updatable = false)
+    @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
     @Override

@@ -71,7 +71,7 @@ public class OtpVerificationService {
             return userRepository.save(createdUser);
         });
 
-        String accessToken = jwtTokenService.generateAccessToken(user.getId());
+        String accessToken = jwtTokenService.generateAccessToken(user.getId(),user.getSystemRole());
         return new VerifyOtpResponseDto(
                 user.getId(),
                 user.getPhoneNumber(),

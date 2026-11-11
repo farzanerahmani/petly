@@ -4,6 +4,7 @@ import com.petly.food.entity.FoodPrice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author farzane.rahmani
@@ -11,6 +12,20 @@ import java.util.List;
  */
 public interface FoodPriceRepository extends JpaRepository<FoodPrice, Long> {
 
-    List<FoodPrice> findAllByFoodProductIdOrderByCheckedAtDesc(Long foodProductId);
+    List<FoodPrice> findByFoodProductIdOrderByCheckedAtDesc(
+            Long foodProductId
+    );
+
+    List<FoodPrice> findByFoodListingIdOrderByCheckedAtDesc(
+            Long foodListingId
+    );
+
+    List<FoodPrice> findByPetShopIdOrderByCheckedAtDesc(
+            Long petShopId
+    );
+
+    Optional<FoodPrice> findTopByFoodListingIdOrderByCheckedAtDesc(
+            Long foodListingId
+    );
 }
 

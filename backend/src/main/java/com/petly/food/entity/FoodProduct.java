@@ -1,3 +1,4 @@
+
 package com.petly.food.entity;
 
 import com.petly.common.entity.AuditableEntity;
@@ -12,8 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author farzane.rahmani
- * @created 10/20/2026
+ * Represents a canonical food product in the Petly catalog.
  */
 @Entity
 @Table(
@@ -65,11 +65,14 @@ public class FoodProduct extends AuditableEntity {
     )
     private FoodNutrition nutrition;
 
-    @OneToMany(
-            mappedBy = "foodProduct",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    /*
+     * Price history must remain independent from the lifecycle
+     * of the canonical food product.
+     *
+     * No CascadeType.REMOVE or orphanRemoval is used here.
+     * The database handles product deletion with ON DELETE SET NULL.
+     */
+    @OneToMany(mappedBy = "foodProduct")
     private List<FoodPrice> prices = new ArrayList<>();
 
     public void setNutrition(FoodNutrition nutrition) {
@@ -81,13 +84,26 @@ public class FoodProduct extends AuditableEntity {
     }
 
     public void addPrice(FoodPrice price) {
-        prices.add(price);
+        if (price == null) {
+            return;
+        }
+
+        if (!prices.contains(price)) {
+            prices.add(price);
+        }
+
         price.setFoodProduct(this);
     }
 
     public void removePrice(FoodPrice price) {
+        if (price == null) {
+            return;
+        }
+
         prices.remove(price);
-        price.setFoodProduct(null);
+
+        if (price.getFoodProduct() == this) {
+            price.setFoodProduct(null);
+        }
     }
 }
-

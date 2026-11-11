@@ -1,6 +1,7 @@
 
 package com.petly.auth.service;
 
+import com.petly.user.entity.enums.SystemRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -27,12 +28,13 @@ public class JwtTokenService {
     @Value("${petly.jwt.expiration-seconds}")
     private long expirationSeconds;
 
-    public String generateAccessToken(Long userId) {
+    public String generateAccessToken(Long userId, SystemRole role) {
         Instant now = Instant.now();
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("petly-api")
                 .subject(userId.toString())
+                .claim("role", role.name())
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expirationSeconds))
                 .build();
